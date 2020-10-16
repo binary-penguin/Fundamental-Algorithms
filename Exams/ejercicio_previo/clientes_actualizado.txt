@@ -1,0 +1,9 @@
+1 Juan Perez Urquiza 10000 jperez@gmail.com
+5 Pedro Lopez Albarran 8500 palbarran@hotmail.comm
+3 Pablo Reyes Becerril 7000 preyes@tec.mx
+8 Lucas Diaz Campos 5250 ldiaz@itesm.mx
+7 Mateo Montes_de_Oca Dominguez 3275 mmontes@gmail.com
+9 Armando Arratia Fabila 4127 aglez@hotmail.com
+4 Adriana Fernandez Gomez 3200 afdz@tec.mx
+10 Fernanda Rojas Jimenez 11524 frojas@gmail.com
+6 Valeria Mendez Marin 7896 vmendez@itesm.mx
