@@ -24,6 +24,7 @@ MONTO       FLOAT 9     monto
 # include <String.h>
 # include <fstream>
 # include <conio.h>
+# include <time.h>
 using namespace std;
 
 
@@ -134,12 +135,26 @@ void descarga_clientes() {
     ofstream arch;
     arch.open("clientes.txt", ios::out);
     while (actualc != NULL) {
+        for (int i = 0; i < strlen(actualc->nom); i++) if (actualc->nom[i] == ' ') actualc->nom[i] = '_';
+        for (int i = 0; i < strlen(actualc->ap); i++) if (actualc->ap[i] == ' ') actualc->ap[i] = '_';
+        for (int i = 0; i < strlen(actualc->am); i++) if (actualc->am[i] == ' ') actualc->am[i] = '_';
         arch << actualc->cuenta << " " << actualc->nom << " " << actualc->ap << " " << actualc->am << " " << actualc->cel << " " << actualc->cor << " " << actualc->saldo_ini << " " << actualc->saldo_act << "\n";
-
+        actualc = actualc->next;
     }
+    arch.close();
 }
 
+void descarga_movimientos() {
+    actualm = primerom;
 
+    ofstream arch;
+    arch.open("movimientos.txt", ios::out);
+    while (actualm != NULL) {
+        arch << actualm->cta_mov << " " << actualm->fecha << " " << actualm->monto << "\n";
+        actualm = actualm->next;
+    }
+    arch.close();
+}
 
 void alta_cuenta() {
 
@@ -296,6 +311,170 @@ void listado_clientes() {
     pausa();
 }
 
+char *obtiene_fecha() {
+    time_t tiempo;
+    struct tm, *tm;
+    char fechayhora[11];
+
+    tiempo = time (NULL);
+    tm = localtime(&tiempo);
+    strftime(fechayhora, 11, "%d/%m/%Y", tm);
+    return (fechayhora);
+}
+
+void depositos() {
+     if (!busca_cuenta()) {
+        printf("[ERROR], cuenta inexistente en DataBase ... \n");
+        pausa();
+    }
+
+    else {
+
+        printf("Indica el monto DEPOSITO : \n"); scanf("%f", monto); gets(falso);
+        strcpy(fecha, obtiene_fecha());
+        tipo_mov = 'D';
+        actualc->saldo_act = saldo_act + monto;
+        
+        // Nuevo Node
+
+        nuevom = new NodoMovimientos;
+        nuevom->cta_mov = cuenta;
+        strcpy(nuevom->fecha, fecha);
+        nuevom -> tipo_mov = tipo_mov;
+        nuevom -> monto = monto;
+        nuevom->next = NULL;
+
+
+        // Agregar nuevo nodo a lista mov
+
+        if (primerom == NULL) {
+            primerom = nuevom;
+            ultimom = nuevom;
+        }
+        else 
+        {
+            ultimom -> next = nuevom;
+            ultimom = nuevom;
+        }
+        descarga_clientes();
+        descarga_movimientos();
+
+    }
+}
+
+void retiros() {
+     if (!busca_cuenta()) {
+        printf("[ERROR], cuenta inexistente en DataBase ... \n");
+        pausa();
+    }
+
+    else {
+
+        printf("Indica el monto RETIRO : \n"); scanf("%f", monto); gets(falso);
+        strcpy(fecha, obtiene_fecha());
+        tipo_mov = 'R';
+        if (actualc->saldo_act < monto) {
+            printf("ERROR, fondos insuficientes");
+            return;
+            
+        }
+        else  {
+            actualc->saldo_act = saldo_act - monto;
+        }
+        
+        // Nuevo Node
+
+        nuevom = new NodoMovimientos;
+        nuevom->cta_mov = cuenta;
+        strcpy(nuevom->fecha, fecha);
+        nuevom -> tipo_mov = tipo_mov;
+        nuevom -> monto = monto;
+        nuevom->next = NULL;
+
+
+        // Agregar nuevo nodo a lista mov
+
+        if (primerom == NULL) {
+            primerom = nuevom;
+            ultimom = nuevom;
+        }
+        else 
+        {
+            ultimom -> next = nuevom;
+            ultimom = nuevom;
+        }
+        descarga_clientes();
+        descarga_movimientos();
+
+    }
+}
+
+
+
+
+void estados_cuenta(){
+    printf("**************************************\n");
+    printf("CUENAT          : %d\n", actualc->cuenta);
+    printf("CLIENTE         : %s %s %s \n", actualc->nom, actualc->ap, actualc->am);
+    printf("SALDO ACTUAL    : %d\n", actualc->saldo_act);
+    printf("**************************************\n");
+    printf("MOVS**********************************\n");
+
+    actualm = primerom;
+    while (actualm != NULL) {
+        if (actualm->cta_mov == cuenta) 
+        {
+            printf("* %s", actualm->fecha);
+            if (actualm->tipo_mov == 'D') {
+                printf("           %11.1f\n", actualm->monto);
+            }
+            else {
+                printf("                     %11.1f\n", actualm->monto);
+            }
+        }
+    }
+
+}
+
+void consultaXcelular() {
+    
+    bool existe_cel = 0;
+    printf("Indica el celular a consultar : "); gets(cel);
+
+    actualc = primeroc;
+    while (actualc != NULL) {
+        if (strcmp(actualc->cel, cel) == 0) {
+            existe_cel = 1;
+
+        }
+        actualc = actualc->next;
+    }
+    if (!existe_cel) {
+        printf("ERROR, noetsiste cel.");
+        pausa();
+    }
+    else {
+        
+        for (int i = 0; i < strlen(actualc->nom); i++) if (actualc->nom[i] == '_') actualc->nom[i] = ' ';
+
+        for (int i = 0; i < strlen(actualc->ap); i++) if (actualc->ap[i] == '_') actualc->ap[i] = ' ';
+
+        for (int i = 0; i < strlen(actualc->am); i++) if (actualc->am[i] == '_') actualc->am[i] = ' ';
+
+
+        printf("Cuenta      : %d\n", actualc->cuenta);
+        printf("Nombre      : %s\n", actualc->nom);
+        printf("Ap          : %s\n", actualc->ap);
+        printf("Am          : %s\n", actualc->am);
+        printf("Cel         : %s\n", actualc->cel);
+        printf("Cor         : %s\n", actualc->cor);
+        printf("Saldo ini   : %9.1f\n", actualc->saldo_ini);
+        printf("Saldo act   : %9.1f\n", actualc->saldo_act);
+    }
+
+}
+
+
 void menu() {
     int op = 0;
 
@@ -319,7 +498,11 @@ void menu() {
 
         if (op == 1) alta_cuenta();
         if (op == 2) consulta_cuentaXnumero();
+        if (op == 3) consultaXcelular();
         if (op == 4) listado_clientes();
+        if (op == 5) depositos();
+        if (op == 6) retiros();
+
     }
 }
 
